@@ -14,13 +14,11 @@ module OmniAuth
       def request_phase
         super
       end
+      def callback_url
+        options[:redirect_uri] || (full_host + script_name + callback_path)
+      end
       info do
         raw_info.merge("token" => access_token.token)
-      end
-      def build_access_token 
-        verifier = request.params['code'] 
-        redirect_uri = URI.parse(callback_url).tap { |uri| uri.query = Rack::Utils.parse_query(uri.query).reject { |k,v| %w(code state).include?(k) }.to_query }.to_s 
-        client.auth_code.get_token(verifier, {redirect_uri: redirect_uri}.merge(token_params.to_hash(symbolize_keys: true)), deep_symbolize(options.auth_token_params)) 
       end
       uid { raw_info["id"] }
       def raw_info
